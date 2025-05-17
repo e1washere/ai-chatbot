@@ -1,41 +1,33 @@
 import streamlit as st
-from langchain_community.document_loaders import TextLoader
 from langchain_community.vectorstores import FAISS
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain_core.documents import Document
-import os
-from dotenv import load_dotenv
 from pdf2image import convert_from_path
 import pytesseract
 import tempfile
+import os
 
 st.set_page_config(page_title="Czatbot AI dla Firm", layout="centered")
-load_dotenv()
-
-def extract_text_from_scanned_pdf(file_path):
-    pages = convert_from_path(file_path)
-    all_text = ""
-    for page in pages:
-        text = pytesseract.image_to_string(page, lang="pol+eng", config="--psm 6")
-        all_text += "\n" + text
-    return all_text
 
 @st.cache_resource
-def load_qa_chain(file_path):
+def load_qa_chain(pdf_path):
+    images = convert_from_path(pdf_path)
     docs = []
-    if file_path.endswith(".txt"):
-        loader = TextLoader(file_path)
-        docs = loader.load()
-    elif file_path.endswith(".pdf"):
-        text = extract_text_from_scanned_pdf(file_path)
-        if text.strip() == "":
-            raise ValueError("Nie udało się odczytać tekstu z dokumentu.")
-        docs = [Document(page_content=text)]
-    
-    db = FAISS.from_documents(docs, OpenAIEmbeddings())
+
+    for i, img in enumerate(images):
+        text = pytesseract.image_to_string(img, lang="pol")
+        if text.strip():
+            docs.append(Document(page_content=text, metadata={"page": i + 1}))
+
+    if not docs:
+        raise ValueError("❌ Nie udało się odczytać tekstu z pliku PDF. Upewnij się, że zawiera on czytelny tekst.")
+
+    embeddings = OpenAIEmbeddings()
+    db = FAISS.from_documents(docs, embeddings)
     retriever = db.as_retriever()
+
     qa = RetrievalQA.from_chain_type(
         llm=ChatOpenAI(),
         retriever=retriever,
@@ -46,14 +38,19 @@ def load_qa_chain(file_path):
 
 st.title("🤖 Czatbot AI z Twoich Dokumentów")
 
-uploaded_file = st.file_uploader("📎 Prześlij plik PDF lub TXT", type=["pdf", "txt"])
+uploaded_file = st.file_uploader("📎 Prześlij plik PDF (zeskanowany dokument)", type=["pdf"])
 
 if uploaded_file:
-    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
         tmp.write(uploaded_file.read())
         tmp_path = tmp.name
-    qa_chain = load_qa_chain(tmp_path)
-    st.success("✅ Plik został załadowany. Możesz teraz zadawać pytania!")
+
+    try:
+        qa_chain = load_qa_chain(tmp_path)
+        st.success("✅ Plik został załadowany. Możesz teraz zadawać pytania!")
+    except ValueError as e:
+        st.error(str(e))
+        st.stop()
 else:
     st.info("⬆️ Prześlij plik, aby rozpocząć.")
     st.stop()
@@ -66,7 +63,7 @@ user_input = st.chat_input("Zadaj pytanie dotyczące treści pliku...")
 if user_input:
     st.session_state.history.append(("user", user_input))
     result = qa_chain.invoke(user_input)
-    answer = result['result']
+    answer = result["result"]
     st.session_state.history.append(("bot", answer))
 
 for role, message in st.session_state.history:

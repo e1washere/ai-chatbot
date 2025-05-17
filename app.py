@@ -1,38 +1,39 @@
 import streamlit as st
-from langchain_community.document_loaders import TextLoader, PyPDFLoader
+from langchain_community.document_loaders import TextLoader
 from langchain_community.vectorstores import FAISS
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain_core.documents import Document
-from pdf2image import convert_from_path
-import pytesseract
-from PIL import Image
-import tempfile
 import os
 from dotenv import load_dotenv
+from pdf2image import convert_from_path
+import pytesseract
+import tempfile
 
 st.set_page_config(page_title="Czatbot AI dla Firm", layout="centered")
-
 load_dotenv()
 
 def extract_text_from_scanned_pdf(file_path):
     pages = convert_from_path(file_path)
     all_text = ""
-    for i, page in enumerate(pages):
-        text = pytesseract.image_to_string(page)
-        all_text += f"\nPage {i + 1}:\n{text}"
+    for page in pages:
+        text = pytesseract.image_to_string(page, lang="pol+eng", config="--psm 6")
+        all_text += "\n" + text
     return all_text
 
 @st.cache_resource
 def load_qa_chain(file_path):
     docs = []
-    try:
-        loader = PyPDFLoader(file_path)
+    if file_path.endswith(".txt"):
+        loader = TextLoader(file_path)
         docs = loader.load()
-    except:
+    elif file_path.endswith(".pdf"):
         text = extract_text_from_scanned_pdf(file_path)
+        if text.strip() == "":
+            raise ValueError("Nie udało się odczytać tekstu z dokumentu.")
         docs = [Document(page_content=text)]
+    
     db = FAISS.from_documents(docs, OpenAIEmbeddings())
     retriever = db.as_retriever()
     qa = RetrievalQA.from_chain_type(
@@ -48,10 +49,10 @@ st.title("🤖 Czatbot AI z Twoich Dokumentów")
 uploaded_file = st.file_uploader("📎 Prześlij plik PDF lub TXT", type=["pdf", "txt"])
 
 if uploaded_file:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=uploaded_file.name[-4:]) as tmp_file:
-        tmp_file.write(uploaded_file.read())
-        tmp_file_path = tmp_file.name
-    qa_chain = load_qa_chain(tmp_file_path)
+    with tempfile.NamedTemporaryFile(delete=False) as tmp:
+        tmp.write(uploaded_file.read())
+        tmp_path = tmp.name
+    qa_chain = load_qa_chain(tmp_path)
     st.success("✅ Plik został załadowany. Możesz teraz zadawać pytania!")
 else:
     st.info("⬆️ Prześlij plik, aby rozpocząć.")

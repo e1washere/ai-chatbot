@@ -1,33 +1,23 @@
 import streamlit as st
+import requests
+import tempfile
 from langchain_community.vectorstores import FAISS
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 from langchain_core.documents import Document
-from pdf2image import convert_from_path
-import pytesseract
-import tempfile
 import os
 
 st.set_page_config(page_title="Czatbot AI dla Firm", layout="centered")
 
+OCR_SPACE_API_KEY = os.getenv("OCR_SPACE_API_KEY")
+
 @st.cache_resource
-def load_qa_chain(pdf_path):
-    images = convert_from_path(pdf_path)
-    docs = []
-
-    for i, img in enumerate(images):
-        text = pytesseract.image_to_string(img, lang="pol")
-        if text.strip():
-            docs.append(Document(page_content=text, metadata={"page": i + 1}))
-
-    if not docs:
-        raise ValueError("❌ Nie udało się odczytać tekstu z pliku PDF. Upewnij się, że zawiera on czytelny tekst.")
-
+def load_qa_chain(text):
+    docs = [Document(page_content=text)]
     embeddings = OpenAIEmbeddings()
     db = FAISS.from_documents(docs, embeddings)
     retriever = db.as_retriever()
-
     qa = RetrievalQA.from_chain_type(
         llm=ChatOpenAI(),
         retriever=retriever,
@@ -38,17 +28,31 @@ def load_qa_chain(pdf_path):
 
 st.title("🤖 Czatbot AI z Twoich Dokumentów")
 
-uploaded_file = st.file_uploader("📎 Prześlij plik PDF (zeskanowany dokument)", type=["pdf"])
+uploaded_file = st.file_uploader("📎 Prześlij plik PDF (zeskanowany dokument)", type=["pdf","txt"])
 
 if uploaded_file:
     with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
         tmp.write(uploaded_file.read())
         tmp_path = tmp.name
-
+    if uploaded_file.type == "text/plain":
+        text = open(tmp_path, "r", encoding="utf-8").read()
+    else:
+        with open(tmp_path, "rb") as f:
+            r = requests.post(
+                "https://api.ocr.space/parse/image",
+                files={"file": f},
+                data={"apikey": OCR_SPACE_API_KEY, "language": "pol"},
+            )
+        result = r.json()
+        parsed = result.get("ParsedResults")
+        if not parsed or not parsed[0].get("ParsedText"):
+            st.error("❌ Nie udało się odczytać tekstu z pliku.")
+            st.stop()
+        text = parsed[0]["ParsedText"]
     try:
-        qa_chain = load_qa_chain(tmp_path)
+        qa_chain = load_qa_chain(text)
         st.success("✅ Plik został załadowany. Możesz teraz zadawać pytania!")
-    except ValueError as e:
+    except Exception as e:
         st.error(str(e))
         st.stop()
 else:

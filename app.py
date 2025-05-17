@@ -20,11 +20,8 @@ def load_qa_chain(file_path):
 
     docs = loader.load()
 
-    db = Chroma.from_documents(
-    docs,
-    OpenAIEmbeddings(),
-    persist_directory=None,
-    )
+    db = FAISS.from_documents(docs, OpenAIEmbeddings())
+
 
     retriever = db.as_retriever()
     qa = RetrievalQA.from_chain_type(

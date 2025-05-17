@@ -1,24 +1,18 @@
 import streamlit as st
-import tempfile
 import requests
-from dotenv import load_dotenv
-import os
-
+import tempfile
 from langchain_community.vectorstores import FAISS
-from langchain_core.documents import Document
-from langchain.chains import RetrievalQA
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
-
-load_dotenv()
-OCR_SPACE_API_KEY = st.secrets["OCR_SPACE_API_KEY"]
+from langchain.chains import RetrievalQA
+from langchain_core.documents import Document
 
 st.set_page_config(page_title="Czatbot AI dla Firm", layout="centered")
 
+OCR_SPACE_API_KEY = st.secrets["OCR_SPACE_API_KEY"]
+
 @st.cache_resource
 def load_qa_chain(text):
-    if not text.strip():
-        raise ValueError("Brak tekstu do przetworzenia.")
     docs = [Document(page_content=text)]
     embeddings = OpenAIEmbeddings()
     db = FAISS.from_documents(docs, embeddings)
@@ -33,13 +27,13 @@ def load_qa_chain(text):
 
 st.title("🤖 Czatbot AI z Twoich Dokumentów")
 
-uploaded_file = st.file_uploader("📎 Prześlij plik PDF (zeskanowany) lub TXT", type=["pdf", "txt"])
+uploaded_file = st.file_uploader("📎 Prześlij plik PDF lub TXT", type=["pdf","txt"])
 
 if uploaded_file:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+    suffix = ".txt" if uploaded_file.type == "text/plain" else ".pdf"
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
         tmp.write(uploaded_file.read())
         tmp_path = tmp.name
-
     if uploaded_file.type == "text/plain":
         text = open(tmp_path, "r", encoding="utf-8").read()
     else:
@@ -49,10 +43,11 @@ if uploaded_file:
                 files={"file": f},
                 data={
                     "apikey": OCR_SPACE_API_KEY,
-                    "language": "eng,pol,rus,ukr",
-                    "OCREngine": 2,
-                    "scale": True
-                },
+                    "language": "pol,eng,ukr,rus",
+                    "isOverlayRequired": False,
+                    "scale": True,
+                    "OCREngine": 2
+                }
             )
         result = r.json()
         parsed = result.get("ParsedResults")
@@ -60,7 +55,6 @@ if uploaded_file:
             st.error("❌ Nie udało się odczytać tekstu z pliku.")
             st.stop()
         text = parsed[0]["ParsedText"]
-
     try:
         qa_chain = load_qa_chain(text)
         st.success("✅ Plik został załadowany. Możesz teraz zadawać pytania!")

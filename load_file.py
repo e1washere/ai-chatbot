@@ -13,7 +13,7 @@ docs = loader.load()
 
 db = Chroma.from_documents(docs, OpenAIEmbeddings())
 retriever = db.as_retriever()
-
+ 
 qa = RetrievalQA.from_chain_type(
     llm=ChatOpenAI(),
     retriever=retriever,

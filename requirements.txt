@@ -7,4 +7,7 @@ chromadb
 pypdf
 python-dotenv
 faiss-cpu
+pytesseract
+pdf2image
+Pillow
 

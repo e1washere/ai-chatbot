@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 st.set_page_config(page_title="Czatbot AI dla Firm", layout="centered")
 
 load_dotenv()
-os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 
 @st.cache_resource
 def load_qa_chain(file_path):
@@ -61,3 +60,5 @@ for role, message in st.session_state.history:
 if st.checkbox("📚 Pokaż źródło odpowiedzi") and "result" in locals():
     for i, doc in enumerate(result.get("source_documents", []), start=1):
         st.markdown(f"**Źródło {i}:**\n{doc.page_content}")
+
+print("TESTING CHANGE")

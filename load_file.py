@@ -7,9 +7,6 @@ from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
 
 load_dotenv()
-api_key = os.getenv("OPENAI_API_KEY")
-
-os.environ["OPENAI_API_KEY"] = api_key
 
 loader = TextLoader("example.txt")
 docs = loader.load()

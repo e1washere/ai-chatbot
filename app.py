@@ -60,5 +60,3 @@ for role, message in st.session_state.history:
 if st.checkbox("📚 Pokaż źródło odpowiedzi") and "result" in locals():
     for i, doc in enumerate(result.get("source_documents", []), start=1):
         st.markdown(f"**Źródło {i}:**\n{doc.page_content}")
-
-print("TESTING CHANGE")

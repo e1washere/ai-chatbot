@@ -4,7 +4,7 @@ from langchain_community.vectorstores import FAISS
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_openai import ChatOpenAI
 from langchain.chains import RetrievalQA
-from langchain.document_loaders.base import Document
+from langchain_core.documents import Document
 from pdf2image import convert_from_path
 import pytesseract
 from PIL import Image

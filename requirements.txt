@@ -6,4 +6,5 @@ langchain-openai
 chromadb
 pypdf
 python-dotenv
+faiss-cpu
 

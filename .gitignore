@@ -34,3 +34,10 @@ Thumbs.db
 *.egg-info/
 dist/
 build/
+
+*.pdf
+*.docx
+*.key
+*.env
+
+Bachelor_Thesis (2).pdf

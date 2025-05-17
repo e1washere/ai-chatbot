@@ -19,14 +19,20 @@ def load_qa_chain(file_path):
         loader = TextLoader(file_path)
 
     docs = loader.load()
-    db = Chroma.from_documents(docs, OpenAIEmbeddings())
+
+    db = Chroma.from_documents(
+    docs,
+    OpenAIEmbeddings(),
+    persist_directory=None,
+    )
+
     retriever = db.as_retriever()
     qa = RetrievalQA.from_chain_type(
         llm=ChatOpenAI(),
         retriever=retriever,
         chain_type="stuff",
         return_source_documents=True
-    )
+    ) 
     return qa
 
 st.title("🤖 Czatbot AI z Twoich Dokumentów")

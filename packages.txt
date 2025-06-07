@@ -1,0 +1,3 @@
+build-essential
+libopenblas-dev
+libgl1-mesa-glx 

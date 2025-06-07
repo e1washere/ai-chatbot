@@ -224,47 +224,70 @@ try:
     # Initialize QA chain
     @st.cache_resource
     def load_qa_chain(_docs): # Use _docs to indicate it's for caching
+        # --- DIAGNOSTIC MODE ---
+        # A senior engineer's approach: Isolate and verify each component creation.
+        
+        st.info("--- Starting Diagnostic ---")
+        
+        # 1. Test httpx.Client creation
+        http_client = None
         try:
-            # Step 1: Create a fully configured OpenAI client, bypassing langchain's auto-configuration
-            # This is the key to solving the proxy issue in Streamlit Cloud
+            st.write("Attempting: Create `httpx.Client` with `proxies=None`...")
+            http_client = httpx.Client(proxies=None)
+            st.success("Success: `httpx.Client` created.")
+        except Exception as e:
+            st.error(f"Failure: Could not create `httpx.Client`. Error: {e}")
+            st.exception(e)
+            st.stop()
+
+        # 2. Test OpenAI client creation
+        openai_client = None
+        try:
+            st.write("Attempting: Create `openai.OpenAI` client...")
             openai_client = OpenAI(
                 api_key=st.secrets["OPENAI_API_KEY"],
-                http_client=httpx.Client(proxies=None) # Explicitly disable proxies
+                http_client=http_client
             )
+            st.success("Success: `openai.OpenAI` client created.")
+        except Exception as e:
+            st.error(f"Failure: Could not create `openai.OpenAI` client. Error: {e}")
+            st.exception(e)
+            st.stop()
 
-            # Step 2: Pass the pre-configured client to LangChain components
-            # We still pass the api_key for validation purposes in some langchain versions
+        # 3. Test OpenAIEmbeddings creation
+        embeddings = None
+        try:
+            st.write("Attempting: Create `langchain_openai.OpenAIEmbeddings`...")
             embeddings = OpenAIEmbeddings(
-                openai_api_key=st.secrets["OPENAI_API_KEY"],
+                model="text-embedding-3-small",
                 client=openai_client
             )
-            
-            db = FAISS.from_documents(_docs, embeddings)
-            retriever = db.as_retriever(search_kwargs={"k": 5})
-
-            llm = ChatOpenAI(
-                openai_api_key=st.secrets["OPENAI_API_KEY"],
-                client=openai_client,
-                temperature=0.1,
-                model="gpt-4o"
-            )
-
-            # Step 3: Build the QA chain
-            qa = RetrievalQA.from_chain_type(
-                llm=llm,
-                retriever=retriever,
-                chain_type="stuff",
-                return_source_documents=True
-            )
-            return qa
+            st.success("Success: `OpenAIEmbeddings` created.")
         except Exception as e:
-            logger.error(f"Error initializing QA chain: {str(e)}")
-            st.error("❌ Błąd podczas inicjalizacji asystenta AI. Sprawdź klucz OpenAI API.")
-            st.exception(e) # Show full exception for debugging
-            return None
+            st.error(f"Failure: Could not create `OpenAIEmbeddings`. Error: {e}")
+            st.exception(e)
+            st.stop()
+
+        # 4. Test FAISS creation
+        db = None
+        try:
+            st.write("Attempting: Create `FAISS` vector store...")
+            db = FAISS.from_documents(_docs, embeddings)
+            st.success("Success: `FAISS` vector store created.")
+        except Exception as e:
+            st.error(f"Failure: Could not create `FAISS` vector store. Error: {e}")
+            st.exception(e)
+            st.stop()
+
+        st.info("--- Diagnostic Complete: All components initialized successfully. ---")
+        st.warning("Application halted after diagnostics. This is intentional. Please send a screenshot of this output.")
+        # We stop here in diagnostic mode. The real chain is not built.
+        return None # Return None to show the app we are in a special mode.
+
 
     qa_chain = load_qa_chain(all_docs)
     if not qa_chain:
+        st.info("Diagnostic mode is active or an error occurred. See messages above.")
         st.stop()
 
     st.success(f"✅ Załadowano {len(uploaded_files)} plików. Możesz teraz zadawać pytania!")

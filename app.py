@@ -4,6 +4,7 @@ import tempfile
 import os
 from datetime import datetime
 import httpx
+from openai import OpenAI
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
 from langchain_openai.embeddings import OpenAIEmbeddings
@@ -224,24 +225,33 @@ try:
     @st.cache_resource
     def load_qa_chain(_docs): # Use _docs to indicate it's for caching
         try:
-            # Create an httpx client with proxies disabled, which is necessary for Streamlit Cloud
-            http_client = httpx.Client(proxies=None)
+            # Step 1: Create a fully configured OpenAI client, bypassing langchain's auto-configuration
+            # This is the key to solving the proxy issue in Streamlit Cloud
+            openai_client = OpenAI(
+                api_key=st.secrets["OPENAI_API_KEY"],
+                http_client=httpx.Client(proxies=None) # Explicitly disable proxies
+            )
 
+            # Step 2: Pass the pre-configured client to LangChain components
+            # We still pass the api_key for validation purposes in some langchain versions
             embeddings = OpenAIEmbeddings(
-                openai_api_key=st.secrets["OPENAI_API_KEY"], 
-                http_client=http_client
+                openai_api_key=st.secrets["OPENAI_API_KEY"],
+                client=openai_client
             )
+            
             db = FAISS.from_documents(_docs, embeddings)
-            retriever = db.as_retriever(
-                search_kwargs={"k": 5}
+            retriever = db.as_retriever(search_kwargs={"k": 5})
+
+            llm = ChatOpenAI(
+                openai_api_key=st.secrets["OPENAI_API_KEY"],
+                client=openai_client,
+                temperature=0.1,
+                model="gpt-4o"
             )
+
+            # Step 3: Build the QA chain
             qa = RetrievalQA.from_chain_type(
-                llm=ChatOpenAI(
-                    temperature=0.1, 
-                    model_name="gpt-4o", 
-                    openai_api_key=st.secrets["OPENAI_API_KEY"],
-                    http_client=http_client
-                ),
+                llm=llm,
                 retriever=retriever,
                 chain_type="stuff",
                 return_source_documents=True

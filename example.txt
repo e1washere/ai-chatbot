@@ -1,1 +1,0 @@
-LangChain is a Python library for building apps with language models. It supports document embedding, retrieval, and Q&A using GPT models like GPT-4.

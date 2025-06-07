@@ -1,13 +1,13 @@
 # AI Dokumenty - Inteligentny Asystent Dokumentów
 
-AI Dokumenty to zaawansowane narzędzie AI, które pomaga firmom analizować i wyszukiwać informacje w dokumentach PDF. Wspiera wiele języków (PL, EN, UKR, RU) i obsługuje zarówno zeskanowane, jak i cyfrowe dokumenty.
+Zaawansowane narzędzie AI do analizy dokumentów PDF z wykorzystaniem sztucznej inteligencji. Wspiera języki polski, angielski, ukraiński i rosyjski.
 
-## 🌟 Główne funkcje
+## 🚀 Funkcje
 
-- 📄 Obsługa wielu plików PDF jednocześnie
+- 📄 Analiza wielu plików PDF jednocześnie
 - 🔍 Inteligentne wyszukiwanie w dokumentach
 - 🌐 Wsparcie dla wielu języków (PL, EN, UKR, RU)
-- 📱 Responsywny interfejs mobilny
+- 📱 Responsywny interfejs
 - 💳 System subskrypcji (darmowa/premium)
 - 📊 Źródła odpowiedzi z numerami stron
 
@@ -33,7 +33,7 @@ AI Dokumenty to zaawansowane narzędzie AI, które pomaga firmom analizować i w
    - Analiza raportów i dokumentacji
    - Wyszukiwanie w bazach wiedzy
 
-## 🚀 Wdrożenie
+## 📦 Instalacja
 
 1. Sklonuj repozytorium:
 ```bash
@@ -46,18 +46,84 @@ cd ai-dokumenty
 pip install -r requirements.txt
 ```
 
-3. Skonfiguruj zmienne środowiskowe w pliku `.streamlit/secrets.toml`:
+3. Utwórz plik `.streamlit/secrets.toml`:
 ```toml
+# OpenAI API Key (required)
 OPENAI_API_KEY = "your-openai-api-key"
+
+# OCR.Space API Key (required for scanned PDFs)
 OCR_SPACE_API_KEY = "your-ocr-space-api-key"
+
+# Stripe Configuration (required for payments)
 STRIPE_SECRET_KEY = "your-stripe-secret-key"
 STRIPE_PAYMENT_LINK = "your-stripe-payment-link"
+
+# App Configuration
+MAX_FREE_PDFS = 1
+ENVIRONMENT = "production"
 ```
 
 4. Uruchom aplikację:
 ```bash
 streamlit run app.py
 ```
+
+## 🔧 Rozwiązywanie problemów
+
+### Błąd podczas instalacji zależności
+
+Jeśli pojawi się błąd z `faiss-cpu`, spróbuj:
+1. Usuń linię `faiss-cpu==1.7.4` z `requirements.txt`
+2. Uruchom ponownie deployment
+
+### Błąd OCR
+
+Jeśli OCR nie działa:
+1. Sprawdź czy klucz OCR.Space API jest poprawny
+2. Upewnij się, że PDF nie jest zabezpieczony
+
+### Błąd OPENAI API
+
+Jeśli pojawia się błąd OpenAI:
+1. Sprawdź czy klucz API jest aktualny
+2. Upewnij się, że masz wystarczające środki na koncie
+
+### Błąd Stripe
+
+Jeśli płatności nie działają:
+1. Sprawdź czy klucze Stripe są prawidłowe
+2. Upewnij się, że link do płatności jest aktualny
+
+## 📱 Deployment
+
+### Streamlit Cloud
+
+1. Połącz z GitHub
+2. Dodaj wszystkie sekrety w ustawieniach
+3. Zdeployuj aplikację
+
+### Landing Page
+
+1. Zdeployuj folder `landing/` na Netlify/Vercel
+2. Dodaj własną domenę
+3. Skonfiguruj Google Analytics
+
+## 📞 Wsparcie
+
+W razie problemów:
+- Email: support@aidokumenty.pl
+- GitHub Issues
+- Dokumentacja: [link do dokumentacji]
+
+## 🔒 Bezpieczeństwo
+
+- Wszystkie dokumenty są przetwarzane lokalnie
+- Nie przechowujemy zawartości dokumentów
+- Zgodność z RODO/GDPR
+
+## 📄 Licencja
+
+MIT License - zobacz plik LICENSE
 
 ## 💰 Model cenowy
 
@@ -84,16 +150,3 @@ Nasze rozwiązanie jest szczególnie przydatne dla:
 Wspieramy dokumenty w językach polskim, angielskim, ukraińskim i rosyjskim, a nasz system OCR pozwala na pracę zarówno z dokumentami cyfrowymi, jak i zeskanowanymi.
 
 Rozpocznij za darmo i przekonaj się, jak AI Dokumenty może zoptymalizować pracę Twojej firmy!"
-
-## 🔒 Bezpieczeństwo
-
-- Wszystkie dokumenty są przetwarzane lokalnie
-- Brak przechowywania danych
-- Szyfrowana komunikacja
-- Zgodność z RODO
-
-## 📞 Wsparcie
-
-W razie pytań lub problemów, skontaktuj się z nami:
-- Email: support@aidokumenty.pl
-- Telefon: +48 XXX XXX XXX

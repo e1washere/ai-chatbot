@@ -3,29 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Dokumenty - Inteligentny Asystent Dokumentów</title>
+    <title>AI Dokumenty - Inteligentny Asystent dla Twoich Dokumentów</title>
+    <meta name="description" content="AI Dokumenty to rewolucyjne narzędzie, które przekształca Twoje dokumenty PDF w interaktywną bazę wiedzy. Zadawaj pytania i otrzymuj natychmiastowe, precyzyjne odpowiedzi.">
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
+        body { font-family: 'Inter', sans-serif; }
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            background-color: #E0E7FF;
+            color: #3730A3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 text-gray-800">
     <!-- Navigation -->
-    <nav class="bg-white shadow-sm">
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
-                    <img src="https://via.placeholder.com/150x50?text=AI+Dokumenty" alt="AI Dokumenty" class="h-8">
+                    <span class="text-2xl font-bold text-indigo-700">AI Dokumenty</span>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <a href="#features" class="text-gray-600 hover:text-gray-900">Funkcje</a>
-                    <a href="#pricing" class="text-gray-600 hover:text-gray-900">Cennik</a>
-                    <a href="#contact" class="text-gray-600 hover:text-gray-900">Kontakt</a>
-                    <a href="https://app.aidokumenty.pl" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
-                        Rozpocznij za darmo
+                <div class="hidden sm:flex items-center space-x-8">
+                    <a href="#features" class="text-gray-600 hover:text-indigo-600 font-medium">Funkcje</a>
+                    <a href="#pricing" class="text-gray-600 hover:text-indigo-600 font-medium">Cennik</a>
+                    <a href="#faq" class="text-gray-600 hover:text-indigo-600 font-medium">FAQ</a>
+                    <a href="#contact" class="text-gray-600 hover:text-indigo-600 font-medium">Kontakt</a>
+                </div>
+                <div class="flex items-center">
+                     <a href="#" class="bg-indigo-600 text-white px-5 py-2 rounded-md font-semibold hover:bg-indigo-700 transition-colors">
+                        Przejdź do aplikacji
                     </a>
                 </div>
             </div>
@@ -33,161 +49,146 @@
     </nav>
 
     <!-- Hero Section -->
-    <div class="bg-white">
-        <div class="max-w-7xl mx-auto py-16 px-4 sm:py-24 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <h1 class="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
-                    Inteligentny Asystent Dokumentów
-                </h1>
-                <p class="mt-6 max-w-2xl mx-auto text-xl text-gray-500">
-                    Przekształć swoje dokumenty w inteligentną bazę wiedzy. Zadawaj pytania w naturalnym języku i otrzymuj natychmiastowe odpowiedzi.
-                </p>
-                <div class="mt-10">
-                    <a href="https://app.aidokumenty.pl" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                        Rozpocznij za darmo
-                    </a>
-                </div>
+    <header class="bg-white">
+        <div class="max-w-7xl mx-auto py-20 px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 leading-tight">
+                Zyskaj <span class="text-indigo-600">supermoc</span> w pracy z dokumentami
+            </h1>
+            <p class="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-gray-600">
+                Przestań tracić czas na ręczne przeszukiwanie plików PDF. Nasz asystent AI przeczyta je za Ciebie i odpowie na każde pytanie w kilka sekund.
+            </p>
+            <div class="mt-10 flex justify-center items-center space-x-4">
+                <a href="#" class="inline-block bg-indigo-600 text-white px-8 py-3 rounded-md text-lg font-semibold hover:bg-indigo-700 transition-transform transform hover:scale-105">
+                    Wypróbuj za darmo
+                </a>
+                 <a href="#features" class="inline-block text-indigo-600 font-semibold text-lg">
+                    Dowiedz się więcej &rarr;
+                </a>
             </div>
         </div>
-    </div>
+    </header>
 
     <!-- Features Section -->
-    <div id="features" class="py-12 bg-gray-50">
+    <section id="features" class="py-20 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
                 <h2 class="text-3xl font-extrabold text-gray-900">
-                    Główne funkcje
+                    Wszystko, czego potrzebujesz do efektywnej pracy
                 </h2>
+                <p class="mt-4 text-lg text-gray-600">
+                    AI Dokumenty to kompleksowe narzędzie, które rewolucjonizuje analizę dokumentów.
+                </p>
             </div>
-            <div class="mt-10">
-                <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
-                    <div class="bg-white p-6 rounded-lg shadow-sm">
-                        <h3 class="text-lg font-medium text-gray-900">Wielojęzyczność</h3>
-                        <p class="mt-2 text-gray-500">Wsparcie dla języków polskiego, angielskiego, ukraińskiego i rosyjskiego.</p>
+            <div class="mt-16 grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+                <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m-9 9h18" /></svg>
                     </div>
-                    <div class="bg-white p-6 rounded-lg shadow-sm">
-                        <h3 class="text-lg font-medium text-gray-900">OCR</h3>
-                        <p class="mt-2 text-gray-500">Automatyczne rozpoznawanie tekstu w zeskanowanych dokumentach.</p>
+                    <h3 class="text-xl font-bold text-gray-900">Wielojęzyczność</h3>
+                    <p class="mt-2 text-gray-600">Płynnie analizuj dokumenty w języku polskim, angielskim, ukraińskim i rosyjskim.</p>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                     </div>
-                    <div class="bg-white p-6 rounded-lg shadow-sm">
-                        <h3 class="text-lg font-medium text-gray-900">Wieluplikowość</h3>
-                        <p class="mt-2 text-gray-500">Przetwarzaj wiele dokumentów jednocześnie.</p>
+                    <h3 class="text-xl font-bold text-gray-900">Inteligentne OCR</h3>
+                    <p class="mt-2 text-gray-600">Nasza zaawansowana technologia OCR radzi sobie nawet z trudnymi skanami i zdjęciami dokumentów.</p>
+                </div>
+                <div class="bg-white p-8 rounded-lg shadow-md hover:shadow-xl transition-shadow">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v11.494m-9-5.747h18" /></svg>
                     </div>
+                    <h3 class="text-xl font-bold text-gray-900">Bezpieczeństwo i Prywatność</h3>
+                    <p class="mt-2 text-gray-600">Twoje dokumenty są przetwarzane z najwyższymi standardami bezpieczeństwa i nigdy nie są przechowywane.</p>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Use Cases Section -->
-    <div class="py-12 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <h2 class="text-3xl font-extrabold text-gray-900">
-                    Idealne dla
-                </h2>
-            </div>
-            <div class="mt-10">
-                <div class="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-3">
-                    <div class="bg-gray-50 p-6 rounded-lg">
-                        <h3 class="text-lg font-medium text-gray-900">Kancelarie prawne</h3>
-                        <p class="mt-2 text-gray-500">Analiza umów i dokumentów prawnych.</p>
-                    </div>
-                    <div class="bg-gray-50 p-6 rounded-lg">
-                        <h3 class="text-lg font-medium text-gray-900">Działy HR</h3>
-                        <p class="mt-2 text-gray-500">Zarządzanie dokumentacją pracowniczą.</p>
-                    </div>
-                    <div class="bg-gray-50 p-6 rounded-lg">
-                        <h3 class="text-lg font-medium text-gray-900">Firmy ubezpieczeniowe</h3>
-                        <p class="mt-2 text-gray-500">Analiza polis i dokumentów ubezpieczeniowych.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    </section>
 
     <!-- Pricing Section -->
-    <div id="pricing" class="py-12 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="pricing" class="py-20 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center">
-                <h2 class="text-3xl font-extrabold text-gray-900">
-                    Cennik
-                </h2>
+                 <h2 class="text-3xl font-extrabold text-gray-900">Prosty i przejrzysty cennik</h2>
+                 <p class="mt-4 text-lg text-gray-600">Wybierz plan dopasowany do Twoich potrzeb. Bez ukrytych opłat.</p>
             </div>
-            <div class="mt-10">
-                <div class="grid grid-cols-1 gap-10 sm:grid-cols-2">
-                    <div class="bg-white p-6 rounded-lg shadow-sm">
-                        <h3 class="text-lg font-medium text-gray-900">Wersja darmowa</h3>
-                        <p class="mt-2 text-3xl font-bold text-gray-900">0 zł</p>
-                        <ul class="mt-4 space-y-2">
-                            <li class="flex items-center">
-                                <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span class="ml-2 text-gray-500">1 plik PDF</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span class="ml-2 text-gray-500">Podstawowe funkcje</span>
-                            </li>
-                        </ul>
+            <div class="mt-12 grid gap-10 md:grid-cols-2">
+                <div class="border border-gray-200 rounded-lg p-8 flex flex-col">
+                    <h3 class="text-2xl font-bold text-gray-900">Free</h3>
+                    <p class="mt-2 text-gray-500">Idealny do wypróbowania.</p>
+                    <p class="mt-6 text-5xl font-extrabold text-gray-900">0 zł</p>
+                    <ul class="mt-8 space-y-4 text-gray-600">
+                        <li class="flex items-center"><svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>Analiza 1 pliku PDF</li>
+                    </ul>
+                    <a href="#" class="mt-auto w-full text-center bg-gray-100 text-indigo-600 py-3 rounded-md font-semibold hover:bg-gray-200">Przejdź do aplikacji</a>
+                </div>
+                <div class="border-2 border-indigo-600 rounded-lg p-8 flex flex-col relative">
+                    <span class="bg-indigo-600 text-white text-xs font-bold uppercase px-3 py-1 rounded-full absolute top-0 -mt-3">Najpopularniejszy</span>
+                    <h3 class="text-2xl font-bold text-gray-900">Premium</h3>
+                    <p class="mt-2 text-gray-500">Dla profesjonalistów i firm.</p>
+                    <p class="mt-6 text-5xl font-extrabold text-gray-900">199 zł<span class="text-lg font-medium text-gray-500">/mies.</span></p>
+                    <ul class="mt-8 space-y-4 text-gray-600">
+                        <li class="flex items-center"><svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>Nielimitowana liczba plików</li>
+                        <li class="flex items-center"><svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>Zaawansowane funkcje AI</li>
+                        <li class="flex items-center"><svg class="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"></path></svg>Priorytetowe wsparcie</li>
+                    </ul>
+                    <a href="#" class="mt-auto w-full text-center bg-indigo-600 text-white py-3 rounded-md font-semibold hover:bg-indigo-700">Wybierz plan Premium</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 bg-gray-50">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-extrabold text-gray-900 text-center">Często zadawane pytania</h2>
+            <div class="mt-10 space-y-6" x-data="{ open: null }">
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <button @click="open = open === 1 ? null : 1" class="w-full text-left flex justify-between items-center">
+                        <span class="text-lg font-medium text-gray-900">Jakie formaty plików są obsługiwane?</span>
+                        <svg class="h-6 w-6 transition-transform" :class="{ 'rotate-180': open === 1 }" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open === 1" x-collapse class="mt-4 text-gray-600">
+                        Obecnie wspieramy wyłącznie pliki w formacie PDF, zarówno cyfrowe, jak i zeskanowane.
                     </div>
-                    <div class="bg-white p-6 rounded-lg shadow-sm">
-                        <h3 class="text-lg font-medium text-gray-900">Wersja premium</h3>
-                        <p class="mt-2 text-3xl font-bold text-gray-900">199 zł/mies.</p>
-                        <ul class="mt-4 space-y-2">
-                            <li class="flex items-center">
-                                <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span class="ml-2 text-gray-500">Nielimitowana liczba plików</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span class="ml-2 text-gray-500">Wszystkie funkcje</span>
-                            </li>
-                            <li class="flex items-center">
-                                <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <span class="ml-2 text-gray-500">Priorytetowe wsparcie</span>
-                            </li>
-                        </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm">
+                    <button @click="open = open === 2 ? null : 2" class="w-full text-left flex justify-between items-center">
+                        <span class="text-lg font-medium text-gray-900">Czy moje dane są bezpieczne?</span>
+                        <svg class="h-6 w-6 transition-transform" :class="{ 'rotate-180': open === 2 }" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open === 2" x-collapse class="mt-4 text-gray-600">
+                        Absolutnie tak. Bezpieczeństwo jest dla nas priorytetem. Nie przechowujemy Twoich dokumentów po zakończeniu sesji. Cała komunikacja jest szyfrowana.
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Contact Section -->
-    <div id="contact" class="py-12 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <h2 class="text-3xl font-extrabold text-gray-900">
-                    Kontakt
-                </h2>
-                <p class="mt-4 text-lg text-gray-500">
-                    Masz pytania? Skontaktuj się z nami!
-                </p>
-                <div class="mt-6">
-                    <a href="mailto:support@aidokumenty.pl" class="text-blue-600 hover:text-blue-500">
-                        support@aidokumenty.pl
-                    </a>
-                </div>
+    <section id="contact" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-extrabold text-gray-900">Masz pytania?</h2>
+            <p class="mt-4 text-lg text-gray-600">
+                Chętnie na nie odpowiemy. Skontaktuj się z naszym zespołem.
+            </p>
+            <div class="mt-8">
+                <a href="mailto:support@aidokumenty.pl" class="inline-block bg-indigo-600 text-white px-8 py-3 rounded-md text-lg font-semibold hover:bg-indigo-700">
+                    Napisz do nas
+                </a>
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-50">
+    <footer class="bg-gray-800 text-white">
         <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <p class="text-gray-500">
-                    © 2024 AI Dokumenty. Wszelkie prawa zastrzeżone.
-                </p>
+            <div class="flex justify-between items-center">
+                <p>&copy; 2024 AI Dokumenty. Wszelkie prawa zastrzeżone.</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="hover:text-gray-300">Polityka Prywatności</a>
+                    <a href="#" class="hover:text-gray-300">Regulamin</a>
+                </div>
             </div>
         </div>
     </footer>

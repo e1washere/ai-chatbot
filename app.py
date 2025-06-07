@@ -225,7 +225,7 @@ try:
     def load_qa_chain(_docs): # Use _docs to indicate it's for caching
         try:
             # Create an httpx client with proxies disabled, which is necessary for Streamlit Cloud
-            http_client = httpx.Client(proxies="")
+            http_client = httpx.Client(proxies=None)
 
             embeddings = OpenAIEmbeddings(
                 openai_api_key=st.secrets["OPENAI_API_KEY"], 

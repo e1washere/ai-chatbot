@@ -3,6 +3,7 @@ import requests
 import tempfile
 import os
 from datetime import datetime
+import httpx
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_community.vectorstores import FAISS
 from langchain_openai.embeddings import OpenAIEmbeddings
@@ -223,13 +224,24 @@ try:
     @st.cache_resource
     def load_qa_chain(_docs): # Use _docs to indicate it's for caching
         try:
-            embeddings = OpenAIEmbeddings(openai_api_key=st.secrets["OPENAI_API_KEY"])
+            # Create an httpx client with proxies disabled, which is necessary for Streamlit Cloud
+            http_client = httpx.Client(proxies="")
+
+            embeddings = OpenAIEmbeddings(
+                openai_api_key=st.secrets["OPENAI_API_KEY"], 
+                http_client=http_client
+            )
             db = FAISS.from_documents(_docs, embeddings)
             retriever = db.as_retriever(
                 search_kwargs={"k": 5}
             )
             qa = RetrievalQA.from_chain_type(
-                llm=ChatOpenAI(temperature=0.1, model_name="gpt-4o", openai_api_key=st.secrets["OPENAI_API_KEY"]),
+                llm=ChatOpenAI(
+                    temperature=0.1, 
+                    model_name="gpt-4o", 
+                    openai_api_key=st.secrets["OPENAI_API_KEY"],
+                    http_client=http_client
+                ),
                 retriever=retriever,
                 chain_type="stuff",
                 return_source_documents=True

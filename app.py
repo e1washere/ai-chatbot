@@ -223,13 +223,13 @@ try:
     @st.cache_resource
     def load_qa_chain(_docs): # Use _docs to indicate it's for caching
         try:
-            embeddings = OpenAIEmbeddings()
+            embeddings = OpenAIEmbeddings(openai_api_key=st.secrets["OPENAI_API_KEY"])
             db = FAISS.from_documents(_docs, embeddings)
             retriever = db.as_retriever(
                 search_kwargs={"k": 5}
             )
             qa = RetrievalQA.from_chain_type(
-                llm=ChatOpenAI(temperature=0.1, model_name="gpt-4o"),
+                llm=ChatOpenAI(temperature=0.1, model_name="gpt-4o", openai_api_key=st.secrets["OPENAI_API_KEY"]),
                 retriever=retriever,
                 chain_type="stuff",
                 return_source_documents=True

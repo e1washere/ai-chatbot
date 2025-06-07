@@ -23,12 +23,9 @@ from httpx import Response, Timeout
 # but uses the robust and simple `requests` library underneath. This bypasses
 # all the problematic auto-configuration in `httpx` within the Streamlit Cloud env.
 class RequestsClient:
-    def __init__(self, timeout=600):
-        self._timeout = timeout
-
-    @property
-    def timeout(self):
-        return self._timeout
+    def __init__(self, timeout: float = 60.0):
+        # The OpenAI client library expects a `timeout` attribute on the client instance.
+        self.timeout = timeout
 
     def request(
         self,
@@ -41,13 +38,16 @@ class RequestsClient:
         **kwargs: Any,
     ) -> Response:
         try:
+            # Use the instance's timeout if no per-request timeout is specified.
+            request_timeout = timeout.read if timeout else self.timeout
+            
             response = requests.request(
                 method,
                 url,
                 headers=headers,
                 data=content,
-                timeout=timeout.read if timeout else self._timeout,
-                proxies=None
+                timeout=request_timeout,
+                proxies=None # Ensure no proxies are ever used.
             )
             return Response(
                 status_code=response.status_code,

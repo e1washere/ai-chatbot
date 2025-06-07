@@ -16,48 +16,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize Stripe
-stripe.api_key = st.secrets["STRIPE_SECRET_KEY"]
-
-# Constants
-MAX_FREE_PDFS = st.secrets.get("MAX_FREE_PDFS", 1)
-SUPPORTED_LANGUAGES = {
-    "Polski": "pol",
-    "English": "eng",
-    "Українська": "ukr",
-    "Русский": "rus"
-}
-
-# OCR Function
-def extract_text_via_ocr(path):
-    """Extract text from image using OCR.space API"""
-    try:
-        with open(path, "rb") as f:
-            r = requests.post(
-                "https://api.ocr.space/parse/image",
-                files={"file": f},
-                data={
-                    "apikey": st.secrets["OCR_SPACE_API_KEY"],
-                    "language": "pol,eng,ukr,rus",
-                    "isOverlayRequired": False,
-                    "scale": True,
-                    "OCREngine": 2
-                },
-                timeout=30  # Add timeout
-            )
-        r.raise_for_status()  # Raise exception for bad status codes
-        result = r.json()
-        parsed = result.get("ParsedResults")
-        if not parsed or not parsed[0].get("ParsedText"):
-            logger.warning("OCR returned no text")
-            return ""
-        return parsed[0]["ParsedText"]
-    except Exception as e:
-        logger.error(f"OCR error: {str(e)}")
-        st.error("❌ Błąd podczas rozpoznawania tekstu. Spróbuj ponownie później.")
-        return ""
-
-# Page config
+# --- Page Config and Custom CSS ---
 st.set_page_config(
     page_title="AI Dokumenty - Inteligentny Asystent Dokumentów",
     page_icon="🤖",
@@ -65,7 +24,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS
 st.markdown("""
     <style>
     .main { padding: 2rem; }
@@ -96,11 +54,82 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
+# --- API Key and Secrets Validation ---
+SECRETS_OK = True
+REQUIRED_SECRETS = ["STRIPE_SECRET_KEY", "OPENAI_API_KEY", "OCR_SPACE_API_KEY", "STRIPE_PAYMENT_LINK"]
+with st.sidebar:
+    st.image("https://i.imgur.com/nJgq2hL.png", width=150) # Using a direct link to a hosted image
+    st.markdown("---")
+
+    for secret in REQUIRED_SECRETS:
+        if secret not in st.secrets:
+            st.error(f"❌ Brakuje sekretu: {secret}")
+            SECRETS_OK = False
+    
+    if not SECRETS_OK:
+        st.error("Proszę dodać brakujące sekrety w panelu Streamlit Cloud (Manage App -> Secrets).")
+        st.stop()
+
+# If all secrets are present, continue with initialization
+try:
+    stripe.api_key = st.secrets["STRIPE_SECRET_KEY"]
+except Exception as e:
+    st.error("Błąd inicjalizacji Stripe. Sprawdź swój klucz API.")
+    st.exception(e)
+    st.stop()
+
+# Constants
+MAX_FREE_PDFS = st.secrets.get("MAX_FREE_PDFS", 1)
+SUPPORTED_LANGUAGES = {
+    "Polski": "pol",
+    "English": "eng",
+    "Українська": "ukr",
+    "Русский": "rus"
+}
+
+# OCR Function
+def extract_text_via_ocr(path):
+    """Extract text from a file using OCR.space API"""
+    try:
+        with open(path, "rb") as f:
+            r = requests.post(
+                "https://api.ocr.space/parse/image",
+                files={"file": f},
+                data={
+                    "apikey": st.secrets["OCR_SPACE_API_KEY"],
+                    "language": "pol,eng,ukr,rus",
+                    "isOverlayRequired": False,
+                    "scale": True,
+                    "OCREngine": 2
+                },
+                timeout=60  # Increased timeout for larger files
+            )
+        r.raise_for_status()
+        result = r.json()
+        if result.get("IsErroredOnProcessing"):
+            logger.error(f"OCR API Error: {result.get('ErrorMessage')}")
+            st.error(f"❌ Błąd API OCR: {result.get('ErrorMessage')}")
+            return ""
+        parsed = result.get("ParsedResults")
+        if not parsed or not parsed[0].get("ParsedText"):
+            logger.warning("OCR returned no text")
+            return ""
+        return parsed[0]["ParsedText"]
+    except requests.exceptions.RequestException as e:
+        logger.error(f"OCR request error: {str(e)}")
+        st.error("❌ Błąd połączenia z API OCR. Spróbuj ponownie później.")
+        return ""
+    except Exception as e:
+        logger.error(f"An unexpected OCR error occurred: {str(e)}")
+        st.error("❌ Wystąpił nieoczekiwany błąd podczas rozpoznawania tekstu.")
+        st.exception(e) # Show full exception for debugging
+        return ""
+
+# Page config is now at the top
+# Custom CSS is now at the top
+
 # Sidebar
 with st.sidebar:
-    st.image("https://via.placeholder.com/150x50?text=AI+Dokumenty", width=150)
-    st.markdown("---")
-    
     # Language selection
     selected_language = st.selectbox(
         "🌐 Wybierz język / Select language",
@@ -114,7 +143,7 @@ with st.sidebar:
     if st.session_state.subscription_status == "free":
         st.info("🆓 Wersja darmowa: 1 PDF")
         if st.button("💎 Przejdź na wersję premium"):
-            st.markdown(f"[Przejdź na wersję premium]({st.secrets['STRIPE_PAYMENT_LINK']})")
+            st.markdown(f"[Kup subskrypcję]({st.secrets['STRIPE_PAYMENT_LINK']})", unsafe_allow_html=True)
     else:
         st.success("💎 Wersja premium: Nielimitowana liczba PDF-ów")
 
@@ -125,8 +154,9 @@ st.markdown("""
     Nasz asystent AI pomoże Ci znaleźć odpowiedzi w Twoich dokumentach.
 """)
 
-# File uploader
+# Main app logic in a try-except block for better error handling
 try:
+    # File uploader
     uploaded_files = st.file_uploader(
         "📎 Prześlij pliki PDF",
         type=["pdf"],
@@ -145,55 +175,61 @@ try:
 
     # Process uploaded files
     all_docs = []
-    with st.spinner("Przetwarzanie dokumentów..."):
+    with st.spinner("Przetwarzanie dokumentów... To może potrwać chwilę."):
         for uploaded_file in uploaded_files:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-                tmp.write(uploaded_file.read())
-                tmp_path = tmp.name
-            
+            tmp_path = None
             try:
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+                    tmp.write(uploaded_file.read())
+                    tmp_path = tmp.name
+                
                 # Try direct PDF parsing first
-                loader = PyPDFLoader(tmp_path)
-                docs = loader.load()
-                for doc in docs:
-                    doc.metadata["source"] = uploaded_file.name
-                    doc.metadata["page"] = doc.metadata.get("page", 0) + 1
-                all_docs.extend(docs)
-                logger.info(f"Successfully processed PDF: {uploaded_file.name}")
-            except Exception as e:
-                logger.warning(f"PDF parsing failed, trying OCR: {str(e)}")
-                # Fallback to OCR
-                text = extract_text_via_ocr(tmp_path)
-                if text:
-                    doc = Document(
-                        page_content=text,
-                        metadata={
-                            "source": uploaded_file.name,
-                            "page": 1
-                        }
-                    )
-                    all_docs.append(doc)
-                    logger.info(f"Successfully processed PDF via OCR: {uploaded_file.name}")
-                else:
-                    st.error(f"❌ Nie udało się przetworzyć pliku: {uploaded_file.name}")
+                try:
+                    loader = PyPDFLoader(tmp_path)
+                    docs = loader.load()
+                    # If PDF is scanned, docs can be empty or have no text content.
+                    if not docs or not "".join(d.page_content for d in docs).strip():
+                        logger.warning(f"PDF '{uploaded_file.name}' seems to be scanned or empty, falling back to OCR.")
+                        raise ValueError("Empty PDF") # Force fallback to OCR
+                    
+                    for doc in docs:
+                        doc.metadata["source"] = uploaded_file.name
+                        doc.metadata["page"] = doc.metadata.get("page", 0) + 1
+                    all_docs.extend(docs)
+                    logger.info(f"Successfully processed digital PDF: {uploaded_file.name}")
 
-            os.unlink(tmp_path)
+                except Exception as e:
+                    logger.warning(f"Digital PDF parsing failed for '{uploaded_file.name}' ({e}), trying OCR.")
+                    text = extract_text_via_ocr(tmp_path)
+                    if text:
+                        doc = Document(
+                            page_content=text,
+                            metadata={"source": uploaded_file.name, "page": 1}
+                        )
+                        all_docs.append(doc)
+                        logger.info(f"Successfully processed scanned PDF via OCR: {uploaded_file.name}")
+                    else:
+                        st.warning(f"⚠️ Nie udało się przetworzyć pliku: {uploaded_file.name}. Może być uszkodzony lub pusty.")
+
+            finally:
+                if tmp_path and os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
 
     if not all_docs:
-        st.error("❌ Nie udało się odczytać tekstu z plików.")
+        st.error("❌ Nie udało się odczytać tekstu z żadnego z przesłanych plików. Sprawdź, czy pliki nie są uszkodzone lub chronione hasłem.")
         st.stop()
 
     # Initialize QA chain
     @st.cache_resource
-    def load_qa_chain(docs):
+    def load_qa_chain(_docs): # Use _docs to indicate it's for caching
         try:
             embeddings = OpenAIEmbeddings()
-            db = FAISS.from_documents(docs, embeddings)
+            db = FAISS.from_documents(_docs, embeddings)
             retriever = db.as_retriever(
-                search_kwargs={"k": 4}  # Retrieve top 4 most relevant chunks
+                search_kwargs={"k": 5}
             )
             qa = RetrievalQA.from_chain_type(
-                llm=ChatOpenAI(temperature=0),  # More precise answers
+                llm=ChatOpenAI(temperature=0.1, model_name="gpt-4o"),
                 retriever=retriever,
                 chain_type="stuff",
                 return_source_documents=True
@@ -201,7 +237,8 @@ try:
             return qa
         except Exception as e:
             logger.error(f"Error initializing QA chain: {str(e)}")
-            st.error("❌ Błąd podczas inicjalizacji asystenta AI. Spróbuj ponownie później.")
+            st.error("❌ Błąd podczas inicjalizacji asystenta AI. Sprawdź klucz OpenAI API.")
+            st.exception(e) # Show full exception for debugging
             return None
 
     qa_chain = load_qa_chain(all_docs)
@@ -214,36 +251,38 @@ try:
     if "history" not in st.session_state:
         st.session_state.history = []
 
-    user_input = st.chat_input("Zadaj pytanie dotyczące treści dokumentów...")
-
-    if user_input:
+    if user_input := st.chat_input("Zadaj pytanie dotyczące treści dokumentów..."):
         try:
             st.session_state.history.append(("user", user_input))
-            with st.spinner("Szukam odpowiedzi..."):
-                result = qa_chain.invoke(user_input)
+            with st.spinner("Analizuję..."):
+                result = qa_chain.invoke({"query": user_input})
             st.session_state.history.append(("bot", result["result"]))
+            
+            # Display chat history immediately after getting a new response
+            for role, message in st.session_state.history:
+                with st.chat_message(role):
+                    st.write(message)
+            
+            # Show sources for the last response
+            with st.expander("📚 Zobacz źródła odpowiedzi"):
+                for i, doc in enumerate(result.get("source_documents", []), start=1):
+                    st.markdown(f"""
+                    **Źródło {i}:** Plik: `{doc.metadata.get('source', 'N/A')}`, Strona: `{doc.metadata.get('page', 'N/A')}`
+                    > {doc.page_content[:300]}...
+                    """)
+
         except Exception as e:
             logger.error(f"Error processing user input: {str(e)}")
-            st.error("❌ Błąd podczas przetwarzania pytania. Spróbuj ponownie później.")
+            st.error("❌ Błąd podczas przetwarzania pytania.")
+            st.exception(e) # Show full exception for debugging
+    else:
+        # Display chat history on first load as well
+        for role, message in st.session_state.history:
+            with st.chat_message(role):
+                st.write(message)
 
-    # Display chat history
-    for role, message in st.session_state.history:
-        with st.chat_message(role):
-            st.write(message)
 
-    # Show sources
-    if st.checkbox("📚 Pokaż źródła odpowiedzi") and "result" in locals():
-        st.markdown("### Źródła:")
-        for i, doc in enumerate(result.get("source_documents", []), start=1):
-            st.markdown(f"""
-            **Źródło {i}:**
-            - Plik: {doc.metadata.get('source', 'Nieznany')}
-            - Strona: {doc.metadata.get('page', 'Nieznana')}
-            - Fragment:
-            ```
-            {doc.page_content[:200]}...
-            ```
-            """)
 except Exception as e:
-    logger.error(f"Error processing file upload: {str(e)}")
-    st.error("❌ Błąd podczas przetwarzania plików. Spróbuj ponownie później.")
+    logger.error(f"An unexpected error occurred in the main app block: {str(e)}")
+    st.error("❌ Wystąpił krytyczny błąd aplikacji.")
+    st.exception(e) # Show full exception for debugging

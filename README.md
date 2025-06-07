@@ -150,3 +150,6 @@ Nasze rozwiązanie jest szczególnie przydatne dla:
 Wspieramy dokumenty w językach polskim, angielskim, ukraińskim i rosyjskim, a nasz system OCR pozwala na pracę zarówno z dokumentami cyfrowymi, jak i zeskanowanymi.
 
 Rozpocznij za darmo i przekonaj się, jak AI Dokumenty może zoptymalizować pracę Twojej firmy!"
+
+---
+*Ostatnia aktualizacja: 2025-06-07*

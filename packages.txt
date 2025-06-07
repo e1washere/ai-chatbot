@@ -4,4 +4,5 @@ libopenblas-dev
 liblapack-dev
 gfortran
 pkg-config
-libgl1-mesa-glx 
+libgl1-mesa-glx
+swig 

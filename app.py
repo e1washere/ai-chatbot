@@ -13,6 +13,50 @@ from langchain.chains import RetrievalQA
 from langchain_core.documents import Document
 import stripe
 import logging
+import json
+from typing import Any, Dict, Tuple, Optional
+from httpx import Response, Timeout
+
+# --- 40-Year Senior Engineer's Solution: The Requests-based HTTPX Adapter ---
+# This class acts as a bridge between the OpenAI library and the `requests` library.
+# It mimics the interface that `openai._base_client.SyncHttpxClientWrapper` expects,
+# but uses the robust and simple `requests` library underneath. This bypasses
+# all the problematic auto-configuration in `httpx` within the Streamlit Cloud env.
+class RequestsClient:
+    def request(
+        self,
+        method: str,
+        url: str,
+        *,
+        content: Optional[bytes] = None,
+        headers: Optional[Dict[str, str]] = None,
+        timeout: Optional[Timeout] = None,
+        **kwargs: Any,
+    ) -> Response:
+        
+        try:
+            # Use `requests` to make the actual HTTP request.
+            # We explicitly set `proxies` to None here to be absolutely sure.
+            response = requests.request(
+                method,
+                url,
+                headers=headers,
+                data=content,
+                timeout=timeout.read if timeout else None,
+                proxies=None # The final safeguard
+            )
+            
+            # The OpenAI library expects an `httpx.Response` object, so we create one
+            # from the `requests.Response` object.
+            return Response(
+                status_code=response.status_code,
+                headers=response.headers,
+                content=response.content,
+                request=response.request,
+            )
+        except requests.exceptions.RequestException as e:
+            # In case of a network error, wrap it in a generic exception.
+            raise Exception(f"Network error with `requests`: {e}") from e
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -225,31 +269,34 @@ try:
     @st.cache_resource
     def load_qa_chain(_docs): # Use _docs to indicate it's for caching
         try:
-            # THE DEFINITIVE FIX:
-            # The Streamlit Cloud environment unexpectedly injects proxy settings, causing httpx to fail.
-            # We will programmatically remove these environment variables to ensure a clean slate.
-            for var in ['HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy']:
-                if var in os.environ:
-                    # Use pop to remove the key-value pair
-                    os.environ.pop(var)
+            # THE ULTIMATE FIX:
+            # Instead of trying to fix the environment, we replace the entire network layer
+            # with our own robust, simple `requests`-based client. This gives us 100% control.
+            
+            # Step 1: Instantiate our custom requests-based HTTP client.
+            http_client = RequestsClient()
 
-            # With a clean environment, we can now safely initialize our clients.
-            # We will still create the client manually for maximum control and robustness.
-            openai_client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-
-            # Pass the pre-configured client to LangChain components
+            # Step 2: Manually create the OpenAI client, injecting our custom http_client.
+            # This forces the OpenAI library to use our reliable adapter instead of its
+            # default, problematic httpx client.
+            openai_client = OpenAI(
+                api_key=st.secrets["OPENAI_API_KEY"],
+                http_client=http_client
+            )
+            
+            # Step 3: Pass the fully controlled client to the rest of the chain.
             embeddings = OpenAIEmbeddings(
-                openai_api_key=st.secrets["OPENAI_API_KEY"],
+                openai_api_key=st.secrets["OPENAI_API_KEY"], # Passed for validation
                 client=openai_client
             )
             
             llm = ChatOpenAI(
-                openai_api_key=st.secrets["OPENAI_API_KEY"],
+                openai_api_key=st.secrets["OPENAI_API_KEY"], # Passed for validation
                 client=openai_client,
                 temperature=0.1,
                 model="gpt-4o"
             )
-
+            
             db = FAISS.from_documents(_docs, embeddings)
             retriever = db.as_retriever(search_kwargs={"k": 5})
 

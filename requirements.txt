@@ -3,10 +3,9 @@ openai==1.12.0
 langchain==0.1.9
 langchain-community==0.0.24
 langchain-openai==0.0.8
-faiss-cpu-no-avx2
+faiss-cpu==1.7.4
 pypdf==4.0.1
 python-dotenv==1.0.1
 requests==2.31.0
 stripe==7.11.0
 Pillow==10.2.0
-lxml==4.9.4

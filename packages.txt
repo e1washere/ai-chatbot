@@ -1,3 +1,7 @@
+python3-dev
 build-essential
 libopenblas-dev
+liblapack-dev
+gfortran
+pkg-config
 libgl1-mesa-glx 

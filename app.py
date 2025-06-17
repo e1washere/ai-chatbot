@@ -138,8 +138,17 @@ SUPPORTED_LANGUAGES = {
 }
 
 # OCR Function
-def extract_text_via_ocr(path):
-    """Extract text from a file using OCR.space API"""
+def extract_text_via_ocr(path: str, language_code: str = "pol,eng,ukr,rus"):
+    """Extract text from a file using OCR.space API.
+
+    Parameters
+    ----------
+    path: str
+        Path to the PDF file to perform OCR on.
+    language_code: str
+        A comma separated list of language codes supported by OCR.space.
+        Defaults to Polish, English, Ukrainian and Russian.
+    """
     try:
         with open(path, "rb") as f:
             r = requests.post(
@@ -147,7 +156,7 @@ def extract_text_via_ocr(path):
                 files={"file": f},
                 data={
                     "apikey": st.secrets["OCR_SPACE_API_KEY"],
-                    "language": "pol,eng,ukr,rus",
+                    "language": language_code,
                     "isOverlayRequired": False,
                     "scale": True,
                     "OCREngine": 2
@@ -185,6 +194,7 @@ with st.sidebar:
         "🌐 Wybierz język / Select language",
         list(SUPPORTED_LANGUAGES.keys())
     )
+    # The selected language guides OCR for scanned PDFs
     
     # Subscription status
     if "subscription_status" not in st.session_state:
@@ -250,7 +260,10 @@ try:
 
                 except Exception as e:
                     logger.warning(f"Digital PDF parsing failed for '{uploaded_file.name}' ({e}), trying OCR.")
-                    text = extract_text_via_ocr(tmp_path)
+                    text = extract_text_via_ocr(
+                        tmp_path,
+                        SUPPORTED_LANGUAGES.get(selected_language, "pol,eng,ukr,rus")
+                    )
                     if text:
                         doc = Document(
                             page_content=text,

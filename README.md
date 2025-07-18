@@ -1,5 +1,12 @@
 # AI Dokumenty - Inteligentny Asystent Dokumentów
 
+![License](https://img.shields.io/github/license/e1washere/ai-chatbot)
+![Last Commit](https://img.shields.io/github/last-commit/e1washere/ai-chatbot)
+![Python](https://img.shields.io/badge/Built%20with-Python-blue)
+![GitHub issues](https://img.shields.io/github/issues/e1washere/ai-chatbot)
+![GitHub Repo stars](https://img.shields.io/github/stars/e1washere/ai-chatbot?style=social)
+![GitHub forks](https://img.shields.io/github/forks/e1washere/ai-chatbot?style=social)
+
 Zaawansowane narzędzie AI do analizy dokumentów PDF z wykorzystaniem sztucznej inteligencji. Wspiera języki polski, angielski, ukraiński i rosyjski.
 
 ## 🚀 Funkcje
